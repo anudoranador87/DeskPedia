@@ -3,7 +3,9 @@
 > **La enciclopedia del recepcionista** · *The receptionist's encyclopedia*
 
 ---
+### Demo
 
+[deskpedia.github.io](https://anudoranador87.github.io/DeskPedia/)
 ## 🇪🇸 Español
 
 ### ¿Qué es DeskPedia?
@@ -58,7 +60,9 @@ Trabajé más de 8 años en recepción hotelera en España y Reino Unido. Una de
 ---
 
 ## 🇬🇧 English
+### Demo
 
+[deskpedia.github.io](https://anudoranador87.github.io/DeskPedia/)
 ### What is DeskPedia?
 
 DeskPedia is a Málaga guide for hotel receptionists, built on the public Wikipedia API. It comes from a real need: at reception, you need quick answers about monuments, gastronomy, history, and local culture to assist international guests. The tool includes predefined chips covering the topics tourists ask about most in Málaga.
