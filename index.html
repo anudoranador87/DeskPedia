@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="DeskPedia: guía de Málaga para recepcionistas de hotel."
+    />
+    <title>DeskPedia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="main-header">
+      <!-- Cambia esta URL por tu foto generada con IA -->
+      <div
+        class="header-bg"
+        style="background-image: url('foto\ aerea.png')"
+      ></div>
+      <div class="header-overlay"></div>
+
+      <div class="header-inner">
+        <!-- Silueta SVG minimalista de la Alcazaba -->
+        <div class="header-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 100 60"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+          >
+            <rect x="0" y="20" width="18" height="40" rx="1" />
+            <rect x="0" y="14" width="6" height="8" />
+            <rect x="6" y="14" width="6" height="6" />
+            <rect x="12" y="14" width="6" height="8" />
+            <rect x="18" y="30" width="20" height="30" />
+            <rect x="18" y="24" width="5" height="8" />
+            <rect x="26" y="24" width="5" height="8" />
+            <rect x="38" y="10" width="22" height="50" rx="1" />
+            <rect x="38" y="2" width="6" height="10" />
+            <rect x="46" y="2" width="6" height="8" />
+            <rect x="54" y="2" width="6" height="10" />
+            <rect x="44" y="38" width="10" height="22" rx="5 5 0 0" />
+            <rect x="60" y="30" width="22" height="30" />
+            <rect x="60" y="24" width="5" height="8" />
+            <rect x="68" y="24" width="5" height="8" />
+            <rect x="82" y="20" width="18" height="40" rx="1" />
+            <rect x="82" y="14" width="6" height="8" />
+            <rect x="88" y="14" width="6" height="6" />
+            <rect x="94" y="14" width="6" height="8" />
+            <rect x="0" y="58" width="100" height="2" />
+          </svg>
+        </div>
+
+        <p class="header-kicker">Guía local para recepcionistas</p>
+        <h1 class="header-title">DeskPedia</h1>
+        <p class="header-tagline">Donde el Mediterráneo besa la historia</p>
+        <p class="header-sub">
+          Todo lo que Málaga tiene que contar, en tus manos
+        </p>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section id="buscador" class="section-buscador" aria-label="Buscador">
+        <div class="search-box">
+          <label for="search-input" class="sr-only">Término de búsqueda</label>
+          <input
+            type="search"
+            id="search-input"
+            class="search-input"
+            placeholder="Busca un lugar, monumento o tema de Málaga..."
+            autocomplete="off"
+            aria-describedby="search-hint"
+          />
+          <button
+            type="button"
+            id="btn-buscar"
+            class="btn-buscar"
+            aria-label="Buscar"
+          >
+            Buscar
+          </button>
+        </div>
+
+        <p id="search-hint" class="search-hint">
+          Temas frecuentes en recepción:
+        </p>
+
+        <div
+          class="chips-container"
+          id="chips-container"
+          role="list"
+          aria-label="Búsquedas sugeridas"
+        ></div>
+
+        <button type="button" id="btn-aleatorio" class="btn-aleatorio">
+          Artículo sorpresa →
+        </button>
+      </section>
+
+      <section
+        id="resultados"
+        class="section-resultados"
+        aria-live="polite"
+        aria-label="Resultados"
+      >
+        <div id="estado-vacio" class="estado estado-vacio">
+          <p class="estado-icono">◇</p>
+          <p class="estado-texto">¿Qué quiere saber tu huésped?</p>
+          <p class="estado-sub">Escribe o elige un tema frecuente</p>
+        </div>
+
+        <div id="estado-cargando" class="estado estado-cargando" hidden>
+          <p class="resultados-label">Consultando Wikipedia...</p>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line short"></div>
+          </div>
+        </div>
+
+        <div id="estado-error" class="estado estado-error" hidden>
+          <p class="estado-icono">✕</p>
+          <p class="estado-texto">No se pudo conectar</p>
+          <p class="estado-sub">Comprueba tu conexión e inténtalo de nuevo</p>
+        </div>
+
+        <div
+          id="estado-sin-resultados"
+          class="estado estado-sin-resultados"
+          hidden
+        >
+          <p class="estado-icono">○</p>
+          <p class="estado-texto">Sin resultados</p>
+          <p class="estado-sub">Prueba con otro término de búsqueda</p>
+        </div>
+
+        <div id="estado-resultados" class="estado" hidden>
+          <p class="resultados-label" id="resultados-label"></p>
+          <div id="lista-resultados" class="lista-resultados"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="main-footer">
+      <p>
+        Datos de
+        <a
+          href="https://es.wikipedia.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Wikipedia</a
+        >
+        · Licencia Creative Commons
+      </p>
+      <p>Hecho por <strong>Jose María Aparicio</strong> · Málaga</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
