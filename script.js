@@ -7,27 +7,54 @@ const API_URL =
 
 const UNSPLASH_KEY = "IHv1EVVYFUlVseCbLHAVSwGYpVuc5jMPgJi0_AWQv6o";
 
-const CHIPS = [
-  "Málaga",
-  "Historia de Málaga",
-  "Alcazaba de Málaga",
-  "Museo Picasso Málaga",
-  "Catedral de Málaga",
-  "Caminito del Rey",
-  "Costa del Sol",
-  "Semana Santa de Málaga",
-  "Feria de Agosto de Málaga",
-  "Vino de Málaga",
-  "El Pimpi",
-  "Mercado de Atarazanas",
-  "Cuevas de Nerja",
-  "El Tintero Málaga",
-  "Sierra de las Nieves",
-  "Castillo de Colomares",
-  "El Torcal de Antequera",
-  "Plaza Mayor Málaga",
-  "Cercanías Málaga",
+const CATEGORIES = [
+  {
+    name: "Museos",
+    items: [
+      "Museo Picasso Málaga",
+      "Museo Carmen Thyssen",
+      "CAC Málaga",
+      "Museo Automovilístico Málaga",
+      "Museo del Vidrio y Cristal",
+      "Museo de Málaga",
+    ],
+  },
+  {
+    name: "Gastronomía",
+    items: [
+      "Tapas Málaga",
+      "El Pimpi",
+      "Mercado de Atarazanas",
+      "Chiringuito La Moraga",
+      "Restaurante José Carlos García",
+      "Casa Lola Málaga",
+    ],
+  },
+  {
+    name: "Tours",
+    items: [
+      "Tour a pie Málaga",
+      "Tour gastronómico Málaga",
+      "Ruta de tapas",
+      "Tour en segway Málaga",
+      "Excursión a Ronda",
+      "Ruta de museos",
+    ],
+  },
+  {
+    name: "Lugares",
+    items: [
+      "Alcazaba de Málaga",
+      "Catedral de Málaga",
+      "Caminito del Rey",
+      "Playa de la Malagueta",
+      "Castillo de Gibralfaro",
+      "Plaza de la Merced",
+    ],
+  },
 ];
+
+let categoriaActiva = CATEGORIES[0].name;
 
 // =====================
 // ELEMENTOS DEL DOM
@@ -36,9 +63,62 @@ const CHIPS = [
 const inputBusqueda = document.getElementById("search-input");
 const btnBuscar = document.getElementById("btn-buscar");
 const btnAleatorio = document.getElementById("btn-aleatorio");
+const categoryButtons = document.getElementById("category-buttons");
 const chipsContainer = document.getElementById("chips-container");
 const listaResultados = document.getElementById("lista-resultados");
 const resultadosLabel = document.getElementById("resultados-label");
+
+// =====================
+// CATEGORÍAS
+// =====================
+
+function renderizarCategorias() {
+  categoryButtons.innerHTML = "";
+
+  CATEGORIES.forEach((categoria) => {
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.textContent = categoria.name;
+    boton.classList.add("category-button");
+    boton.setAttribute("role", "tab");
+    boton.setAttribute(
+      "aria-selected",
+      categoriaActiva === categoria.name ? "true" : "false"
+    );
+
+    if (categoriaActiva === categoria.name) {
+      boton.classList.add("is-active");
+    }
+
+    boton.addEventListener("click", () => {
+      categoriaActiva = categoria.name;
+      renderizarCategorias();
+      renderizarChips(categoria.items);
+    });
+
+    categoryButtons.appendChild(boton);
+  });
+}
+
+function renderizarChips(items) {
+  chipsContainer.innerHTML = "";
+
+  items.forEach((chip) => {
+    const botonChip = document.createElement("button");
+    botonChip.type = "button";
+    botonChip.textContent = chip;
+    botonChip.addEventListener("click", () => {
+      inputBusqueda.value = chip;
+      buscarWikipedia(chip);
+    });
+    chipsContainer.appendChild(botonChip);
+  });
+}
+
+function obtenerChipsActivos() {
+  const categoria = CATEGORIES.find((categoria) => categoria.name === categoriaActiva);
+  return categoria ? categoria.items : CATEGORIES.flatMap((categoria) => categoria.items);
+}
 
 // =====================
 // MOSTRAR ESTADO
@@ -54,26 +134,9 @@ function mostrarEstado(estado) {
   document.getElementById("estado-" + estado).hidden = false;
 }
 
-// =====================
-// CHIPS
-// =====================
-
-function renderizarChips() {
-  CHIPS.forEach((chip) => {
-    const chip1 = document.createElement("button");
-    chip1.textContent = chip;
-    chip1.addEventListener("click", () => {
-      inputBusqueda.value = chip;
-      buscarWikipedia(chip); // busca directamente al pulsar chip
-    });
-    chipsContainer.appendChild(chip1);
-  });
-}
-// =====================
-// BOTON ALEATORIO
-// =====================
 btnAleatorio.addEventListener("click", () => {
-  const chip = CHIPS[Math.floor(Math.random() * CHIPS.length)];
+  const items = obtenerChipsActivos();
+  const chip = items[Math.floor(Math.random() * items.length)];
   inputBusqueda.value = chip;
   buscarWikipedia(chip);
 });
@@ -162,4 +225,5 @@ inputBusqueda.addEventListener("keydown", (e) => {
   }
 });
 
-renderizarChips();
+renderizarCategorias();
+renderizarChips(obtenerChipsActivos());
