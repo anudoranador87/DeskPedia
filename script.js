@@ -38,20 +38,24 @@ const btnBuscar = document.getElementById("btn-buscar");
 const btnAleatorio = document.getElementById("btn-aleatorio");
 const chipsContainer = document.getElementById("chips-container");
 const listaResultados = document.getElementById("lista-resultados");
-const resultadosLabel = document.getElementById("resultados-label");
 
 // =====================
 // MOSTRAR ESTADO
 // =====================
 
 function mostrarEstado(estado) {
-  document.getElementById("estado-vacio").hidden = true;
-  document.getElementById("estado-cargando").hidden = true;
-  document.getElementById("estado-error").hidden = true;
-  document.getElementById("estado-sin-resultados").hidden = true;
-  document.getElementById("estado-resultados").hidden = true;
+  const estados = ["vacio", "cargando", "error", "sin-resultados", "resultados"];
+  estados.forEach(est => {
+    const el = document.getElementById("estado-" + est);
+    if (el) el.hidden = true;
+  });
 
-  document.getElementById("estado-" + estado).hidden = false;
+  const elMostrar = document.getElementById("estado-" + estado);
+  if (elMostrar) {
+    elMostrar.hidden = false;
+    // Accesibilidad: Notificar a lectores de pantalla sobre cambios de estado
+    elMostrar.setAttribute("role", "status");
+  }
 }
 
 // =====================
@@ -59,16 +63,21 @@ function mostrarEstado(estado) {
 // =====================
 
 function renderizarChips() {
+  chipsContainer.innerHTML = "";
   CHIPS.forEach((chip) => {
-    const chip1 = document.createElement("button");
-    chip1.textContent = chip;
-    chip1.addEventListener("click", () => {
+    const chipBtn = document.createElement("button");
+    chipBtn.textContent = chip;
+    chipBtn.classList.add("chip-btn");
+    chipBtn.setAttribute("aria-label", `Buscar información sobre ${chip}`);
+    
+    chipBtn.addEventListener("click", () => {
       inputBusqueda.value = chip;
-      buscarWikipedia(chip); // busca directamente al pulsar chip
+      buscarWikipedia(chip);
     });
-    chipsContainer.appendChild(chip1);
+    chipsContainer.appendChild(chipBtn);
   });
 }
+
 // =====================
 // BOTON ALEATORIO
 // =====================
@@ -77,21 +86,43 @@ btnAleatorio.addEventListener("click", () => {
   inputBusqueda.value = chip;
   buscarWikipedia(chip);
 });
+
 // =====================
 // BUSCAR WIKIPEDIA
 // =====================
 
 async function buscarWikipedia(termino) {
-  if (!termino.trim()) return; // evita búsquedas vacías
-  mostrarEstado("cargando");   // feedback visual mientras espera
+  const query = termino.trim();
+  if (!query) return;
+
+  mostrarEstado("cargando");
+  
   try {
-    const respuesta = await fetch(API_URL + termino);
+    const respuesta = await fetch(API_URL + encodeURIComponent(query));
+    
+    if (!respuesta.ok) {
+      throw new Error(`Error de red: ${respuesta.status}`);
+    }
+
     const data = await respuesta.json();
-    const miArray = data.query.search;
-    mostrarResultados(miArray);
+    
+    if (!data.query || !data.query.search) {
+      mostrarEstado("sin-resultados");
+      return;
+    }
+
+    const resultados = data.query.search;
+    
+    if (resultados.length === 0) {
+      mostrarEstado("sin-resultados");
+    } else {
+      mostrarResultados(resultados);
+    }
   } catch (error) {
+    console.error("Error al buscar en Wikipedia:", error);
     mostrarEstado("error");
-    console.log("Error al buscar:", error);
+    const errorMsg = document.querySelector("#estado-error p");
+    if (errorMsg) errorMsg.textContent = "Hubo un problema al conectar con Wikipedia. Inténtalo de nuevo.";
   }
 }
 
@@ -103,47 +134,61 @@ async function mostrarResultados(resultados) {
   listaResultados.innerHTML = "";
   mostrarEstado("resultados");
 
+  // Usamos Promise.all para manejar las peticiones de Unsplash de forma más eficiente
+  const fragment = document.createDocumentFragment();
+
   for (const obj of resultados) {
-    const contenedor = document.createElement("div");
-    const titulo = document.createElement("h3");
-    const snippet = document.createElement("p");
-    const leerMas = document.createElement("a");
-
+    const contenedor = document.createElement("article");
     contenedor.classList.add("resultado-card");
+    
+    const titulo = document.createElement("h3");
     titulo.classList.add("resultado-titulo");
-    snippet.classList.add("resultado-snippet");
-
     titulo.textContent = obj.title;
-    snippet.innerHTML = obj.snippet;
-    leerMas.href = "https://es.wikipedia.org/wiki/?curid=" + obj.pageid;
+
+    const snippet = document.createElement("p");
+    snippet.classList.add("resultado-snippet");
+    snippet.innerHTML = obj.snippet + "...";
+
+    const leerMas = document.createElement("a");
+    leerMas.href = `https://es.wikipedia.org/wiki/?curid=${obj.pageid}`;
     leerMas.textContent = "Leer más en Wikipedia →";
     leerMas.target = "_blank";
+    leerMas.rel = "noopener noreferrer";
     leerMas.classList.add("resultado-link");
+    leerMas.setAttribute("aria-label", `Leer más sobre ${obj.title} en Wikipedia`);
 
-    // Fetch a Unsplash
+    // Intento de obtener imagen de Unsplash
     try {
       const fotoRes = await fetch(
-        `https://api.unsplash.com/search/photos?query=${obj.title}&per_page=1`,
-        { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(obj.title)}&per_page=1`,
+        { 
+          headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` },
+          signal: AbortSignal.timeout(3000) // Timeout de 3s para no bloquear la UI
+        }
       );
-      const fotoData = await fotoRes.json();
-
-      if (fotoData.results.length > 0) {
-        const img = document.createElement("img");
-        img.src = fotoData.results[0].urls.small;
-        img.alt = obj.title;
-        img.classList.add("resultado-img");
-        contenedor.appendChild(img); // imagen primero, arriba de la card
+      
+      if (fotoRes.ok) {
+        const fotoData = await fotoRes.json();
+        if (fotoData.results && fotoData.results.length > 0) {
+          const img = document.createElement("img");
+          img.src = fotoData.results[0].urls.small;
+          img.alt = `Imagen representativa de ${obj.title}`;
+          img.classList.add("resultado-img");
+          img.loading = "lazy"; // Performance: Lazy loading nativo
+          contenedor.appendChild(img);
+        }
       }
     } catch (error) {
-      console.log("Error Unsplash:", error);
+      console.warn(`No se pudo cargar imagen para ${obj.title}:`, error);
     }
 
     contenedor.appendChild(titulo);
     contenedor.appendChild(snippet);
     contenedor.appendChild(leerMas);
-    listaResultados.appendChild(contenedor);
+    fragment.appendChild(contenedor);
   }
+  
+  listaResultados.appendChild(fragment);
 }
 
 // =====================
@@ -151,15 +196,14 @@ async function mostrarResultados(resultados) {
 // =====================
 
 btnBuscar.addEventListener("click", () => {
-  console.log("click detectado:", inputBusqueda.value);
   buscarWikipedia(inputBusqueda.value);
 });
 
 inputBusqueda.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     buscarWikipedia(inputBusqueda.value);
-    console.log("click detectado:", inputBusqueda.value);
   }
 });
 
+// Inicialización
 renderizarChips();
