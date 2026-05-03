@@ -115,11 +115,10 @@ I worked 8+ years in hotel reception in Spain and the UK. One of the most valued
 ---
 
 ## Autor · Author
+Jose María Aparicio
+Recepcionista de hotel en transición a frontend developer.
+42 días de código documentados en Dev Log 365.
 
-**Jose María Aparicio** · [@anudoranador87](https://github.com/anudoranador87)
-
-Málaga, España · Career changer: Hospitality Management → Frontend Development
-
----
-
+🌐 Portfolio → https://anudoranador87.github.io/JoseMaria-Frondtend-Portfolio/
+📓 Dev Log → https://anudoranador87.github.io/Mi-Camino-Web-365/
 *Datos de Wikipedia bajo licencia Creative Commons CC BY-SA · Wikipedia data under Creative Commons CC BY-SA license*
